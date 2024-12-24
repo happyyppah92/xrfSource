@@ -47,148 +47,26 @@ public abstract class SourceCalculation {
 
         XraySpectrum outputData = new XraySpectrum();
 
-        // Find continium start wavelength
-        double startWavelength = Inparameters.CONV_KEV_ANGSTROM / inParameters.getTubeVoltage();
+        // Find center wavelength of first full spectrum slice     
+        //add by cx
+        double endTubeVoltage= inParameters.getTubeVoltage();
+        double deltaTV= inParameters.getContinuumIntervalSize();
+        double minTubeVoltage=inParameters.getMintubevoltage();
+        double centerTV=minTubeVoltage+deltaTV/2.0d;
+        double TVuppper=minTubeVoltage+deltaTV;
 
-        // Find center wavelength of first full spectrum slice
-        double normalSlice = inParameters.getContinuumIntervalSize();
-        double centerWavelength = startWavelength + (normalSlice / 2.0d);
-        double sliceUpper = centerWavelength + (normalSlice / 2.0d);
-        double maxWavelength = inParameters.getMaxWavelength();
-
-        if (inParameters.isSplitAtAbsEdge()) {
-            // Continuum intervals to be split at anode element absorption edges
-            // Calculate wavelengths of plus/minus 2 eV from absorption edges
-            int z = inParameters.getAnodeElement().getAtomicNumber();
-            Mucal mc = new Mucal(null, z, 0.0d, 'C', true);
-            mc.calculate();
-            double wlBelowKedge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[0] + 0.002d);
-            double wlAboveKedge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[0] - 0.002d);
-            double wlBelowL1edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[1] + 0.002d);
-            double wlAboveL1edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[1] - 0.002d);
-            double wlBelowL2edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[2] + 0.002d);
-            double wlAboveL2edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[2] - 0.002d);
-            double wlBelowL3edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[3] + 0.002d);
-            double wlAboveL3edge = Inparameters.CONV_KEV_ANGSTROM / (mc.getEnergy()[3] - 0.002d);
-
-            if ((sliceUpper < maxWavelength) && (sliceUpper < wlBelowKedge)) {
-                // Add continium slices until slice upper wavelength is above K edge
-                // or max ordered wavelength
-                do {
-                    outputData.addContiniumSlice(
-                            new SpectrumPart(centerWavelength, normalSlice,
-                                    getContiniumIntensity(inParameters,
-                                            centerWavelength, normalSlice)));
-                    centerWavelength += normalSlice;
-                    sliceUpper += normalSlice;
-                } while ((sliceUpper < maxWavelength) && (sliceUpper < wlBelowKedge));
-
-                if (sliceUpper < maxWavelength) {
-                    // Go up to K edge
-                    double slice = wlBelowKedge - (centerWavelength - (normalSlice / 2.0d));
-                    centerWavelength = wlBelowKedge - (slice / 2.0d);
-                    if (slice > MINIMUM_SLICE) {
-                        outputData.addContiniumSlice(
-                                new SpectrumPart(centerWavelength, slice,
-                                        getContiniumIntensity(inParameters,
-                                                centerWavelength, slice)));
-                    }
-                    // Restart at K edge
-                    centerWavelength = wlAboveKedge + (normalSlice / 2.0d);
-                    sliceUpper = centerWavelength + (normalSlice / 2.0d);
-                }
-            }
-            if (sliceUpper < maxWavelength) {
-                // Add continium slices until slice upper wavelength is above L1 edge
-                // or max ordered wavelength
-                do {
-                    outputData.addContiniumSlice(
-                            new SpectrumPart(centerWavelength, normalSlice,
-                                    getContiniumIntensity(inParameters,
-                                            centerWavelength, normalSlice)));
-                    centerWavelength += normalSlice;
-                    sliceUpper += normalSlice;
-                } while ((sliceUpper < maxWavelength) && (sliceUpper < wlBelowL1edge));
-            }
-            if (sliceUpper < maxWavelength) {
-                // Go up to L1 edge
-                double slice = wlBelowL1edge - (centerWavelength - (normalSlice / 2.0d));
-                centerWavelength = wlBelowL1edge - (slice / 2.0d);
-                if (slice > MINIMUM_SLICE) {
-                    outputData.addContiniumSlice(
-                            new SpectrumPart(centerWavelength, slice,
-                                    getContiniumIntensity(inParameters,
-                                            centerWavelength, slice)));
-                }
-                // Restart at L1 edge
-                centerWavelength = wlAboveL1edge + (normalSlice / 2.0d);
-                sliceUpper = centerWavelength + (normalSlice / 2.0d);
-                // Add continium slices until slice upper wavelength is above L2 edge
-                // or max ordered wavelength
-                if (sliceUpper < wlBelowL2edge) {
-                    do {
-                        outputData.addContiniumSlice(
-                                new SpectrumPart(centerWavelength, normalSlice,
-                                        getContiniumIntensity(inParameters,
-                                                centerWavelength, normalSlice)));
-                        centerWavelength += normalSlice;
-                        sliceUpper += normalSlice;
-                    } while ((sliceUpper < maxWavelength) && (sliceUpper < wlBelowL2edge));
-                }
-            }
-            if (sliceUpper < maxWavelength) {
-                // Go up to L2 edge
-                double slice = wlBelowL2edge - (centerWavelength - (normalSlice / 2.0d));
-                centerWavelength = wlBelowL2edge - (slice / 2.0d);
-                if (slice > MINIMUM_SLICE) {
-                    outputData.addContiniumSlice(
-                            new SpectrumPart(centerWavelength, slice,
-                                    getContiniumIntensity(inParameters,
-                                            centerWavelength, slice)));
-                }
-                // Restart at L2 edge
-                centerWavelength = wlAboveL2edge + (normalSlice / 2.0d);
-                sliceUpper = centerWavelength + (normalSlice / 2.0d);
-                // Add continium slices until slice upper wavelength is above L3 edge
-                // or max ordered wavelength
-                if (sliceUpper < wlBelowL3edge) {
-                    do {
-                        outputData.addContiniumSlice(
-                                new SpectrumPart(centerWavelength, normalSlice,
-                                        getContiniumIntensity(inParameters,
-                                                centerWavelength, normalSlice)));
-                        centerWavelength += normalSlice;
-                        sliceUpper += normalSlice;
-                    } while ((sliceUpper < maxWavelength) && (sliceUpper < wlBelowL3edge));
-                }
-            }
-            if (sliceUpper < maxWavelength) {
-                // Go up to L3 edge
-                double slice = wlBelowL3edge - (centerWavelength - (normalSlice / 2.0d));
-                centerWavelength = wlBelowL3edge - (slice / 2.0d);
-                if (slice > MINIMUM_SLICE) {
-                    outputData.addContiniumSlice(
-                            new SpectrumPart(centerWavelength, slice,
-                                    getContiniumIntensity(inParameters,
-                                            centerWavelength, slice)));
-                }
-                // Restart at L3 edge
-                centerWavelength = wlAboveL3edge + (normalSlice / 2.0d);
-                sliceUpper = centerWavelength + (normalSlice / 2.0d);
-            }
-        }
-        if (sliceUpper < maxWavelength) {
-            // Add continium slices until slice upper wavelength reaches max ordered wavelength
+        //改成输入的是kv不是波长
+        if(minTubeVoltage < TVuppper)
+        {
             do {
+                double intensity= getContiniumIntensity(inParameters, centerTV, deltaTV);
                 outputData.addContiniumSlice(
-                        new SpectrumPart(centerWavelength, normalSlice,
-                                getContiniumIntensity(inParameters,
-                                        centerWavelength, normalSlice)));
-                centerWavelength += normalSlice;
-                sliceUpper += normalSlice;
-            } while (sliceUpper < maxWavelength + normalSlice); // to pass max
+                        new SpectrumPart(centerTV, deltaTV,intensity ));
+                centerTV += deltaTV;
+                TVuppper += deltaTV;
+            } while (TVuppper < endTubeVoltage + deltaTV); // to pass max
+        
         }
-
         // Calculate tube line intensities
         calculateTubeLineIntensities(inParameters, outputData);
 
@@ -196,7 +74,7 @@ public abstract class SourceCalculation {
         windowFilterAdjustment(inParameters, outputData);
 
         // Normalize calculated intensities
-        normalizeIntensities(outputData, 1.0d);
+        //normalizeIntensities(outputData, 1.0d);
 
         return outputData;
     }
@@ -239,10 +117,7 @@ public abstract class SourceCalculation {
         // get half of line width in keV
         double halfEwidth = 0.5d * 0.001d * eWidth;
         // Calculate line width in Angstrom
-        return ((Inparameters.CONV_KEV_ANGSTROM
-                / (lineEnergy - halfEwidth))
-                - (Inparameters.CONV_KEV_ANGSTROM
-                / (lineEnergy + halfEwidth)));
+        return (halfEwidth);
     }
     
    /**
@@ -254,12 +129,12 @@ public abstract class SourceCalculation {
     */
     private static double getWindowTransferFactor(
             int atomicNumber,
-            double wavelength, //Angstrom
+            double tubevoltage, //tubevoltage
             double thickness) {  // micrometer
         // Get thickness in cm
-        double cmThickness = 0.0001d * thickness;
+        double cmThickness = 0.0001d * thickness;//Thickness unit um
         double attCoeff = AbsCoefficient
-                .getAttenuationCoefficient(atomicNumber, wavelength);
+                .getAttenuationCoefficient(atomicNumber, tubevoltage);
         return Math.exp(-attCoeff * cmThickness);
     }
     
@@ -267,20 +142,20 @@ public abstract class SourceCalculation {
      * Method calculates a transfer factor for a tube primary filter.
      * 
      * @param filterElements List of FilterElements describing the filter components.
-     * @param wavelength wavelength
+     * @param tubevoltage tubevoltage
      * @param thickness filter thickness in micrometer.
      * @return transfer factor to multiply intensity
      */
     private static double getFilterTransferFactor(
             List<FilterElement> filterElements,
-            double wavelength,
+            double tubevoltage,
             double thickness) {  // micrometer
         // Calculate attenuation coefficient
         double attCoeff = filterElements.stream()
                 .map(fElement -> {
                     int atomicNumber = fElement.getSelectedElement().getAtomicNumber();
                     double conc = fElement.getConc();
-                    double attC = AbsCoefficient.getAttenuationCoefficient(atomicNumber, wavelength);
+                    double attC = AbsCoefficient.getAttenuationCoefficient(atomicNumber, tubevoltage);
                     return attC * conc;
                 })
                 .reduce(0.0d, (a, b) -> a + b);
@@ -308,22 +183,22 @@ public abstract class SourceCalculation {
         // First adjust the tube lines
         outputData.getTubeLines().stream()
                 .forEach(sPart ->{
-                    double waveLength = sPart.getWavelength();
-                    double wTrans = getWindowTransferFactor(windowZ, waveLength, windowThickness);
+                    double tubevoltage = sPart.getTubevoltage();
+                    double wTrans = getWindowTransferFactor(windowZ, tubevoltage, windowThickness);
                     double fTrans = 1.0d;
                     if (isFilt) {
-                        fTrans = getFilterTransferFactor(filterElems, waveLength, filterThickness);
+                        fTrans = getFilterTransferFactor(filterElems, tubevoltage, filterThickness);
                     }
                     sPart.setIntensity(sPart.getIntensity() * wTrans * fTrans);
                 });
         // Adjust continium slices
          outputData.getContinuum().stream()
                 .forEach(sPart ->{
-                    double waveLength = sPart.getWavelength();
-                    double wTrans = getWindowTransferFactor(windowZ, waveLength, windowThickness);
+                    double tubevoltage = sPart.getTubevoltage();
+                    double wTrans = getWindowTransferFactor(windowZ, tubevoltage, windowThickness);
                     double fTrans = 1.0d;
                     if (isFilt) {
-                        fTrans = getFilterTransferFactor(filterElems, waveLength, filterThickness);
+                        fTrans = getFilterTransferFactor(filterElems, tubevoltage, filterThickness);
                     }
                     sPart.setIntensity(sPart.getIntensity() * wTrans * fTrans);
                 });

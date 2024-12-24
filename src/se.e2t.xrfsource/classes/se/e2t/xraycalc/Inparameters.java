@@ -26,8 +26,6 @@ package se.e2t.xraycalc;
 import java.util.ArrayList;
 import java.util.List;
 import static se.e2t.xraycalc.Inparameters.CalcModel.EBEL;
-import static se.e2t.xraycalc.Inparameters.CalcModel.FINPAV;
-import static se.e2t.xraycalc.Inparameters.CalcModel.NIST;
 
 /**
  *
@@ -52,15 +50,13 @@ public class Inparameters {
     private double _filterThickness;
     private double _tubeVoltage;
     private double _continuumIntervalSize;
-    private double _maxWavelength;
+    private double _mintubevoltage;
     private Algorithm _algorithm;
     private boolean _splitAtAbsEdge;
     
     private static final List<TubeElement> ANODE_ELEMENTS;
     static {
         ANODE_ELEMENTS = new ArrayList<>();
-        ANODE_ELEMENTS.add(new TubeElement("Rh", 45));
-        ANODE_ELEMENTS.add(new TubeElement("Cr", 24));
         ANODE_ELEMENTS.add(new TubeElement("W", 74));
     }
     private static final List<TubeElement> WINDOW_ELEMENTS;
@@ -76,18 +72,13 @@ public class Inparameters {
     private static final List<Algorithm> ALG_ALTERNATIVES;
     static {
         ALG_ALTERNATIVES = new ArrayList<>();
-        ALG_ALTERNATIVES.add(new Algorithm("NIST (Pella et al.)", NIST));
         ALG_ALTERNATIVES.add(new Algorithm("Horst Ebel's algorithms", EBEL));
-        ALG_ALTERNATIVES.add(new Algorithm("Finkelshtein and Pavlova", FINPAV));
     }
     
     public static final List<TubeElement> FILTER_ALTERNATIVES;
     static {
         FILTER_ALTERNATIVES = new ArrayList<>();
         FILTER_ALTERNATIVES.add(new TubeElement("Al", 13));
-        FILTER_ALTERNATIVES.add(new TubeElement("Cu", 29));
-        FILTER_ALTERNATIVES.add(new TubeElement("Zn", 30));
-        FILTER_ALTERNATIVES.add(new TubeElement("Pb", 82));
     }
     
     public Inparameters() {
@@ -104,17 +95,17 @@ public class Inparameters {
         _algDescription = ALG_ALTERNATIVES.get(0).getDescription();
         _anodeElement.setAtomicNumber(ANODE_ELEMENTS.get(0).getAtomicNumber());
         _anodeElement.setSymbol(ANODE_ELEMENTS.get(0).getSymbol());
-        _inAngle = 90.0d;
-        _outAngle = 90.0d;
+        _inAngle = 88.0d;
+        _outAngle = 11.0d;
         _windowElement.setAtomicNumber(WINDOW_ELEMENTS.get(0).getAtomicNumber());
         _windowElement.setSymbol(WINDOW_ELEMENTS.get(0).getSymbol());
-        _windowThickness = 50.0d;
+        _windowThickness = 10000.0d;
         _filterThickness = 0.0d;
-        _tubeVoltage = 50.0d;
+        _tubeVoltage = 150.0d;
         _continuumIntervalSize = 0.1d;
-        _maxWavelength = 12.0d;
+        _mintubevoltage = 10.0d;
         _algorithm = getAlgorithms().get(0);
-        _splitAtAbsEdge = true;
+        _splitAtAbsEdge = false;
     }
 
     public static List<TubeElement> getAnodeElements() {
@@ -169,8 +160,8 @@ public class Inparameters {
         return _continuumIntervalSize;
     }
 
-    public double getMaxWavelength() {
-        return _maxWavelength;
+    public double getMintubevoltage() {
+        return _mintubevoltage;
     }
 
     public Algorithm getAlgorithm() {
@@ -211,8 +202,8 @@ public class Inparameters {
         this._continuumIntervalSize = continiumIntervalSize;
     }
 
-    public void setMaxWavelength(double maxWavelength) {
-        this._maxWavelength = maxWavelength;
+    public void setMintubevoltage(double mintubevoltage) {
+        this._mintubevoltage = mintubevoltage;
     }
 
     public void setAlgorithm(Algorithm algorithm) {

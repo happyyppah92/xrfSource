@@ -219,7 +219,7 @@ public class OpenSaveParameters {
                 parameters.setSplitAtAbsEdge(Boolean.valueOf(attr.getValue()));
             }
             if (attr.getName().equals(ATTR_MAX_WAVELENGTH)) {
-                parameters.setMaxWavelength(Double.valueOf(attr.getValue()));
+                parameters.setMintubevoltage(Double.valueOf(attr.getValue()));
             }
         }
         org.w3c.dom.NodeList nodes = element.getChildNodes();
@@ -495,7 +495,7 @@ public class OpenSaveParameters {
             root.setAttribute(ATTR_ANODE_VOLTAGE, String.valueOf(parameters.getTubeVoltage()));
             root.setAttribute(ATTR_INTERVAL_SIZE, String.valueOf(parameters.getContinuumIntervalSize()));
             root.setAttribute(ATTR_SPLIT_INTERVAL_AT_EDGE, String.valueOf(parameters.isSplitAtAbsEdge()));
-            root.setAttribute(ATTR_MAX_WAVELENGTH, String.valueOf(parameters.getMaxWavelength()));
+            root.setAttribute(ATTR_MAX_WAVELENGTH, String.valueOf(parameters.getMintubevoltage()));
             doc.appendChild(root);
 
             // Add anode element info

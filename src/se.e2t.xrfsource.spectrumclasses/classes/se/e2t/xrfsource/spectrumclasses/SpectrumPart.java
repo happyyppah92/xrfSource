@@ -31,18 +31,18 @@ package se.e2t.xrfsource.spectrumclasses;
  */
 public class SpectrumPart {
 
-    private final double _wavelength; // Center wavelength
+    private final double _tubevoltage; // Center wavelength
     private final double _window;     // Window centered at _wavelength
     private double _intensity;  // Intensity at center wavelength
 
-    public SpectrumPart(double wavelength, double window, double intensity) {
-        _wavelength = wavelength;
+    public SpectrumPart(double tubevoltage, double window, double intensity) {
+        _tubevoltage = tubevoltage;
         _window = window;
         _intensity = intensity;
     }
 
-    public double getWavelength() {
-        return _wavelength;
+    public double getTubevoltage() {
+        return _tubevoltage;
     }
 
     public double getWindow() {

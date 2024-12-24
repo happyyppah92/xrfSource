@@ -61,13 +61,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import se.e2t.xraycalc.EbelCalculation;
-import se.e2t.xraycalc.FinPavCalculation;
 import se.e2t.xraycalc.Inparameters;
 import static se.e2t.xraycalc.Inparameters.getAlgorithms;
 import se.e2t.xraycalc.Inparameters.CalcModel;
 import static se.e2t.xraycalc.Inparameters.getAnodeElements;
 import static se.e2t.xraycalc.Inparameters.getWindowElements;
-import se.e2t.xraycalc.NistCalculation;
 import se.e2t.xraycalc.SpectrumFileWriter;
 import static se.e2t.xraygui.Guistart.PROG_TITLE_STRING;
 import se.e2t.xrfsource.spectrumclasses.XraySpectrum;
@@ -133,7 +131,7 @@ public class XraySourceGuiMainController implements Initializable {
     @FXML
     private Button _generateFileButton;
     @FXML
-    private TextField _maxWavelength;
+    private TextField _minTubevoltage;
     @FXML
     private MenuBar _menuBar;
     @FXML
@@ -283,8 +281,8 @@ public class XraySourceGuiMainController implements Initializable {
         // Split at absorption edge
         _splitAtAbsEdge.setSelected(parameters.isSplitAtAbsEdge());
         
-        // Max wavelength
-        _maxWavelength.setText(String.format("%.1f", parameters.getMaxWavelength()));
+        // min tube voltage
+        _minTubevoltage.setText(String.format("%.1f", parameters.getMintubevoltage()));
         
         // Calculation algorithm ChoiceList
         _algSelection.getSelectionModel().select(getAlgorithms().indexOf(parameters.getAlgorithm()));
@@ -403,7 +401,7 @@ public class XraySourceGuiMainController implements Initializable {
 
     private Optional<Integer> verifyWindowThickness() {
         Optional<Integer> iInput = VerifyTextInput.getIntInput(_windowThickness,
-                Optional.of(0), Optional.of(500));
+                Optional.of(0), Optional.of(100000));
         if (iInput.isPresent()) {
             _inParameters.setWindowThickness((double) iInput.get());
         }
@@ -473,7 +471,7 @@ public class XraySourceGuiMainController implements Initializable {
 
     private Optional<Integer> verifyFilterThickness() {
         Optional<Integer> iInput = VerifyTextInput.getIntInput(_filterThickness,
-                Optional.of(0), Optional.of(1000));
+                Optional.of(0), Optional.of(100000));
         if (iInput.isPresent()) {
             _inParameters.setFilterThickness((double) iInput.get());
         }
@@ -507,7 +505,7 @@ public class XraySourceGuiMainController implements Initializable {
 
     private double verifyTubeVoltage() {
         double dInput = VerifyTextInput.getDoubleInput(_tubeVoltage, Optional.of(10.0d),
-                Optional.of(110.0d), "%.1f");
+                Optional.of(400.0d), "%.1f");
         if (!Double.isNaN(dInput)) {
             _inParameters.setTubeVoltage(dInput);
         }
@@ -554,8 +552,8 @@ public class XraySourceGuiMainController implements Initializable {
      * @param event 
      */
     @FXML
-    private void maxWavelengthAction(ActionEvent event) {
-        verifyMaxWavelength();
+    private void minTubevoltageAction(ActionEvent event) {
+        verifyminTubevoltage();
     }
     /**
      * Method is called when the max wavelength text field is modified.
@@ -563,20 +561,23 @@ public class XraySourceGuiMainController implements Initializable {
      * @param event 
      */
     @FXML
-    private void maxWavelengthKeyPressed(KeyEvent event) {
+    private void minTubevoltageKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.TAB) {
-            double dInput = verifyMaxWavelength();
+            double dInput = verifyminTubevoltage();
             if (Double.isNaN(dInput)) {
                 event.consume();
             }
         }
     }
 
-    private double verifyMaxWavelength() {
-        double dInput = VerifyTextInput.getDoubleInput(_maxWavelength, Optional.of(1.0d),
-                Optional.of(20.0d), "%.1f");
+      /**
+     * 
+     */
+    private double verifyminTubevoltage() {
+        double dInput = VerifyTextInput.getDoubleInput(_minTubevoltage, Optional.of(1.0d),
+                Optional.of(10.0d), "%.1f");
         if (!Double.isNaN(dInput)) {
-            _inParameters.setMaxWavelength(dInput);
+            _inParameters.setMintubevoltage(dInput);
         }
         return dInput;
     }
@@ -604,14 +605,9 @@ public class XraySourceGuiMainController implements Initializable {
         int index = _algSelection.getSelectionModel().getSelectedIndex();
         CalcModel calcModel = getAlgorithms().get(index).getCalcModel();
         switch (calcModel) {
-            case NIST: //NIST algorithm
-                outputData = new NistCalculation().calculate(_inParameters);     
-                break;
             case EBEL:
                 outputData = new EbelCalculation().calculate(_inParameters);
                 break;
-            case FINPAV:
-                outputData = new FinPavCalculation().calculate(_inParameters);
             default:
                 Toolkit.getDefaultToolkit().beep();
         }
@@ -785,7 +781,7 @@ public class XraySourceGuiMainController implements Initializable {
         if (Double.isNaN(verifyContinuumSlice())) {
             return 7;
         }
-        if (Double.isNaN(verifyMaxWavelength())) {
+        if (Double.isNaN(verifyminTubevoltage())) {
             return 8;
         }
         return 0;
@@ -958,7 +954,9 @@ public class XraySourceGuiMainController implements Initializable {
          Alert alert = new Alert(Alert.AlertType.INFORMATION,
                 "xrfSource version " + Guistart.PROG_VER + "\n" +
                         "Copyright e2t AB 2019\n" +
-                        "xrfSource is licenced under The MIT License");
+                        "xrfSource is licenced under The MIT License \n"+
+                        "https://github.com/kente2t/xrfSource \n"+
+                        "modified by CX, chenxiao_92@foxmail.com");
         alert.setTitle("About xrfSource");
         alert.setHeaderText(null);
         alert.showAndWait();

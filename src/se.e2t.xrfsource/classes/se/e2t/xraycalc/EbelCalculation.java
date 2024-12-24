@@ -57,13 +57,13 @@ public class EbelCalculation extends SourceCalculation {
     /**
      * Method produces an intensity per Angstrom value for a certain wavelength.
      * @param inParameters reference to parameters input via GUI.
-     * @param wavelength wavelength in Angstrom.
-     * @param wavelengthWidth width of the wavelegth slice to be calculated (Angstrom).
+     * @param tubevoltage tubevoltage in Angstrom.
+     * @param tubevoltageWidth width of the tubevoltage slice to be calculated (Angstrom).
      * @return total calculated intensity within wavelenth interval.
      */
     @Override
     protected double getContiniumIntensity(Inparameters inParameters,
-            double wavelength, double wavelengthWidth) {
+            double Ei, double tubevoltageWidth) {
 
         // Get tube anode atomic number
         int z = inParameters.getAnodeElement().getAtomicNumber();
@@ -71,20 +71,19 @@ public class EbelCalculation extends SourceCalculation {
 
         // Calculate the x exponent
         double energy0 = inParameters.getTubeVoltage();
-        double energy = Inparameters.CONV_KEV_ANGSTROM / wavelength;
+        double energyi = Ei;
         double xExponent = 1.109d - 0.00435d * zD + 0.00175d * energy0;
         // Calculate variables of long expression including photelectric mass absorption
-        double tauEj = AbsCoefficient.getTau(z, wavelength);
+        double tauEj = AbsCoefficient.getTau(z, energyi);
         double sinPhi = Math.sin(inParameters.getInAngle() * Inparameters.ANGLE_CONV);
         double sinEpsilon = Math.sin(inParameters.getOutAngle() * Inparameters.ANGLE_CONV);
-        double rouZ = getRouZ(inParameters.getTubeVoltage(), wavelength, z);
+        double rouZ = getRouZ(energy0, energyi, z);
         double longExpression = tauEj * 2.0d * rouZ
                 * (sinPhi / sinEpsilon);
         double fFactor = (1.0d - Math.exp(-longExpression)) / longExpression;
-        double deltaE = Inparameters.CONV_KEV_ANGSTROM / (wavelength - (wavelengthWidth / 2.0d)) -
-                Inparameters.CONV_KEV_ANGSTROM / (wavelength + (wavelengthWidth / 2.0d));
+        double deltaE =tubevoltageWidth;
         double integratedIntensity = 1.35e9d * zD
-                * Math.pow(((energy0 / energy) - 1.0d), xExponent)
+                * Math.pow(((energy0 / energyi) - 1.0d), xExponent)
                 * fFactor * deltaE;
 
         // Return a per Angstrom value
@@ -94,26 +93,26 @@ public class EbelCalculation extends SourceCalculation {
     /**
      * Method calculates the rouz variable as described in Ebels paper
      *
-     * @param tubeVoltage = X-ray tube voltage in keV.
-     * @param wavelength = When method is called during calculation of continuum
+     * @param E0 = X-ray tube voltage in keV.
+     * @param Ei = When method is called during calculation of continuum
      * intensity this is the wavelength of the continuum slice. When method is
      * called during calculation of tube line intensity then this is the
      * wavelength of the absorption edge associated with the line.
      * @param atomZ = atomic number of x-reay tube target material.
      * @return = value of rouz variable.
      */
-    private double getRouZ(double tubeVoltage, double wavelength, int atomZ) {
+    private double getRouZ(double E0, double Ei, int atomZ) {
 
         double zD = (double) atomZ;
         double j = 0.0135d * zD;
         double rouZm = (AtomicWeights.getRelAtomicWeight(atomZ) / zD)
-                * (0.787e-5d * Math.sqrt(j) * Math.pow(tubeVoltage, 1.5d)
-                + 0.735e-6d * tubeVoltage * tubeVoltage);
+                * (0.787e-5d * Math.sqrt(j) * Math.pow(E0, 1.5d)
+                + 0.735e-6d * E0 * E0);
         double lnZ = Math.log(zD);
         double m = 0.1382d - (0.9211d / Math.sqrt(zD));
-        double eta = Math.pow(tubeVoltage, m) * (0.1904d - 0.2236d * lnZ
-                + 0.1292d * lnZ * lnZ - 0.0149d + lnZ * lnZ * lnZ);
-        double lnU0 = Math.log((tubeVoltage / (Inparameters.CONV_KEV_ANGSTROM / wavelength)));
+        double eta = Math.pow(E0, m) * (0.1904d - 0.2236d * lnZ
+                + 0.1292d * lnZ * lnZ - 0.0149d * lnZ * lnZ * lnZ);
+        double lnU0 = Math.log((E0 / Ei));
         double rouZ = rouZm * lnU0 * ((0.49269d - 1.0987d * eta + 0.78557d * eta * eta)
                 / (0.70256d - 1.09865d * eta + 1.0046d * eta * eta + lnU0));
         return rouZ;
@@ -153,8 +152,7 @@ public class EbelCalculation extends SourceCalculation {
                 .filter(xrfLine -> TransProbabilities.getTransProb(z, xrfLine).isPresent())
                 .forEach(xrfLine -> {
                     LineInfo lineInfo = majorLineInfo.get(xrfLine).get(z);
-                    double wavelength = Inparameters.CONV_KEV_ANGSTROM
-                            / lineInfo.getEnergy();
+                    double Ei = lineInfo.getEnergy();
                     double edgeEnergy = lineInfo.getAbsorptionEdge();
                     // Calculate U0, the overvoltage ratio
                     double u0 = energy0 / edgeEnergy;
@@ -167,11 +165,10 @@ public class EbelCalculation extends SourceCalculation {
                         double squareBracket = 1.0d + 16.05d * bigRoot * (nominator / firstParantesis);
                         double sPowFactor = ((zK * bK) / zD) * firstParantesis * squareBracket;
                         // Calculate the f function
-                        double tau = AbsCoefficient.getTau(z, wavelength);
+                        double tau = AbsCoefficient.getTau(z, Ei);
                         double sinPhi = Math.sin(inParameters.getInAngle() * Inparameters.ANGLE_CONV);
                         double sinEpsilon = Math.sin(inParameters.getOutAngle() * Inparameters.ANGLE_CONV);
-                        double rouZ = getRouZ(inParameters.getTubeVoltage(),
-                                Inparameters.CONV_KEV_ANGSTROM / edgeEnergy, z);
+                        double rouZ = getRouZ(inParameters.getTubeVoltage(),edgeEnergy, z);
                         double longExpression = tau * 2.0d * rouZ
                                 * (sinPhi / sinEpsilon);
                         double fFunction = (1.0d - Math.exp(-longExpression)) / longExpression;
@@ -187,7 +184,7 @@ public class EbelCalculation extends SourceCalculation {
                         double intensity = constK * sPowFactor * r * omegaJK * pJKL * fFunction;
 
                         // Store calculated value
-                        allLines.add(new SpectrumPart(wavelength, lineWidth, intensity));
+                        allLines.add(new SpectrumPart(Ei, lineWidth, intensity));
                     }
                 });
 
@@ -205,8 +202,7 @@ public class EbelCalculation extends SourceCalculation {
                 .filter(xrfLine -> TransProbabilities.getTransProb(z, xrfLine).isPresent())
                 .forEach(xrfLine -> {
                     LineInfo lineInfo = lLineInfo.get(xrfLine).get(z);
-                    double wavelength = Inparameters.CONV_KEV_ANGSTROM
-                            / lineInfo.getEnergy();
+                    double Ei = lineInfo.getEnergy();
                     double edgeEnergy = lineInfo.getAbsorptionEdge();
                     // Calculate U0, the overvoltage ratio
                     double u0 = energy0 / edgeEnergy;
@@ -219,11 +215,10 @@ public class EbelCalculation extends SourceCalculation {
                         double squareBracket = 1.0d + 16.05d * bigRoot * (nominator / firstParantesis);
                         double sPowFactor = ((zL * bL) / zD) * firstParantesis * squareBracket;
                         // Calculate the f function
-                        double tau = AbsCoefficient.getTau(z, wavelength);
+                        double tau = AbsCoefficient.getTau(z, Ei);
                         double sinPhi = Math.sin(inParameters.getInAngle() * Inparameters.ANGLE_CONV);
                         double sinEpsilon = Math.sin(inParameters.getOutAngle() * Inparameters.ANGLE_CONV);
-                        double rouZ = getRouZ(inParameters.getTubeVoltage(),
-                                Inparameters.CONV_KEV_ANGSTROM / edgeEnergy, z);
+                        double rouZ = getRouZ(inParameters.getTubeVoltage(), edgeEnergy, z);
                         double longExpression = tau * 2.0d * rouZ
                                 * (sinPhi / sinEpsilon);
                         double fFunction = (1.0d - Math.exp(-longExpression)) / longExpression;
@@ -249,12 +244,12 @@ public class EbelCalculation extends SourceCalculation {
                         double intensity = constX * sPowFactor * r * omegaJK * pJKL * fFunction;
                         
                         // Store calculated intensity
-                        allLines.add(new SpectrumPart(wavelength, lineWidth, intensity));
+                        allLines.add(new SpectrumPart(Ei, lineWidth, intensity));
                     }
                 });
         // Sort lines in wavelength order and add to output data
         allLines.stream()
-                .sorted(Comparator.comparing(SpectrumPart::getWavelength))
+                .sorted(Comparator.comparing(SpectrumPart::getTubevoltage))
                 .forEach(specPart -> outputData.getTubeLines().add(specPart));
     }
 }

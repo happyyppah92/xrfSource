@@ -117,7 +117,7 @@ public class XrfSourceXmlFormatter implements SpectrumFormatSPI {
             for (SpectrumPart tubeLine : spectrum.getTubeLines()) {
                 Element tElement = doc.createElement(TUBE_LINE_ELEMENT_TAG);
                 tElement.setAttribute(ATTR_WAVELENGTH, String.format("%.3f",
-                        tubeLine.getWavelength()));
+                        tubeLine.getTubevoltage()));
                 tElement.setAttribute(ATTR_WIDTH, String.format("%.2e",
                         tubeLine.getWindow()));
                  tElement.setAttribute(ATTR_INTENSITY, String.format("%.2e",
@@ -132,7 +132,7 @@ public class XrfSourceXmlFormatter implements SpectrumFormatSPI {
             for (SpectrumPart cSlice : spectrum.getContinuum()) {
                 Element csElement = doc.createElement(CONTINUUMSLICE_ELEMENT_TAG);
                 csElement.setAttribute(ATTR_WAVELENGTH, String.format("%.3f",
-                        cSlice.getWavelength()));
+                        cSlice.getTubevoltage()));
                 csElement.setAttribute(ATTR_WIDTH, String.format("%.2e",
                         cSlice.getWindow()));
                 csElement.setAttribute(ATTR_INTENSITY, String.format("%.2e",

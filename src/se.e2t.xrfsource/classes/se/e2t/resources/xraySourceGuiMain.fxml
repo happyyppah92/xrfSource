@@ -87,7 +87,7 @@
                <GridPane.margin>
                   <Insets top="5.0" />
                </GridPane.margin></ChoiceBox>
-            <Label text="Tube window thickness (mym):" GridPane.rowIndex="5" />
+            <Label text="Tube window thickness (um):" GridPane.rowIndex="5" />
             <TextField fx:id="_windowThickness" onAction="#windowThicknessAction" onKeyPressed="#windowThicknessKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="5">
                <GridPane.margin>
                   <Insets top="5.0" />
@@ -117,7 +117,7 @@
                   <Insets top="5.0" />
                </GridPane.margin>
             </TableView>
-            <Label text="Tube filter thickness (mym):" GridPane.rowIndex="7" />
+            <Label text="Tube filter thickness (um):" GridPane.rowIndex="7" />
             <TextField fx:id="_filterThickness" onAction="#filterThicknessAction" onKeyPressed="#filterThicknessKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="7">
                <GridPane.margin>
                   <Insets top="5.0" />
@@ -127,13 +127,13 @@
                <GridPane.margin>
                   <Insets top="5.0" />
                </GridPane.margin></TextField>
-            <Label text="X-ray continuum interval size (Å):" GridPane.rowIndex="9" />
+            <Label text="X-ray continuum interval size (kV):" GridPane.rowIndex="9" />
             <TextField fx:id="_continuumSlice" onAction="#continuumSliceAction" onKeyPressed="#continuumSliceKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="9">
                <GridPane.margin>
                   <Insets top="5.0" />
                </GridPane.margin></TextField>
-            <Label text="X-ray continuum max wavelength (Å):" GridPane.rowIndex="11" />
-            <TextField fx:id="_maxWavelength" onAction="#maxWavelengthAction" onKeyPressed="#maxWavelengthKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="11">
+            <Label text="X-ray continuum min tubevoltage (kV):" GridPane.rowIndex="11" />
+            <TextField fx:id="_minTubevoltage" onAction="#minTubevoltageAction" onKeyPressed="#minTubevoltageKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="11">
                <GridPane.margin>
                   <Insets top="5.0" />
                </GridPane.margin></TextField>

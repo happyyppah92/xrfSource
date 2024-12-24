@@ -38,11 +38,11 @@ public class AbsCoefficient {
     /**
      * Method returns the mass absorption coefficient in cm2/g.
      * @param Z atoic number.
-     * @param wavelength wavelength in Angstrom.
+     * @param tubevoltage kev in Angstrom.
      * @return mass absorption coefficient or NaN if error.
      */
-    public static double getMassAbsCoefficient(int Z, double wavelength) {
-        double energy = Inparameters.CONV_KEV_ANGSTROM / wavelength;
+    public static double getMassAbsCoefficient(int Z, double tubevoltage) {
+        double energy = tubevoltage;
         Mucal mc = new Mucal(null, Z, energy, 'C', true);
         ErrorCode ec = mc.calculate();
         if (ec == Mucal.ErrorCode.within_edge) {
@@ -62,11 +62,11 @@ public class AbsCoefficient {
     /**
      * Method returns the attenuation coefficient (unit /cm)
      * @param Z atoic number.
-     * @param wavelength wavelength in Angstrom.
+     * @param tubevoltage kev in Angstrom.
      * @return absorption coefficient or NaN if error.
      */
-    public static double getAttenuationCoefficient(int Z, double wavelength) {
-        double energy = Inparameters.CONV_KEV_ANGSTROM / wavelength;
+    public static double getAttenuationCoefficient(int Z, double tubevoltage) {
+        double energy = tubevoltage;
         Mucal mc = new Mucal(null, Z, energy, 'C', true);
         ErrorCode ec = mc.calculate();
         if (ec == Mucal.ErrorCode.within_edge) {
@@ -86,11 +86,11 @@ public class AbsCoefficient {
      * Method returns the photoelectric mass absorption coefficient.
      * 
      * @param Z atomic numbet
-     * @param wavelength wavelength in Angstrom
+     * @param tubevoltage kev in Angstrom
      * @return photoelectriv mass absorption coefficient or NaN if error.
      */
-    public static double getTau(int Z, double wavelength) {
-        double energy = Inparameters.CONV_KEV_ANGSTROM / wavelength;
+    public static double getTau(int Z, double tubevoltage) {
+        double energy = tubevoltage;
         Mucal mc = new Mucal(null, Z, energy, 'C', true);
         ErrorCode ec = mc.calculate();
         if (ec == Mucal.ErrorCode.within_edge) {

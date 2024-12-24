@@ -65,14 +65,14 @@ public class XrfSourceCsvFormatter implements SpectrumFormatSPI {
         // Print spectrum data
         // First the tube lines
         for (SpectrumPart sp : spectrum.getTubeLines()) {
-            strW.write(String.format("%.3f, ", sp.getWavelength()));
+            strW.write(String.format("%.3f, ", sp.getTubevoltage()));
             strW.write(String.format("%.2e, ", sp.getIntensity()));
             strW.write(String.format("%.2e, L\n", sp.getWindow()));
         }
 
         // Then the continum slices
         for (SpectrumPart sp : spectrum.getContinuum()) {
-            strW.write(String.format("%.3f, ", sp.getWavelength()));
+            strW.write(String.format("%.3f, ", sp.getTubevoltage()));
             strW.write(String.format("%.2e, ", sp.getIntensity()));
             strW.write(String.format("%.2e, C\n", sp.getWindow()));
         }

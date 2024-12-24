@@ -38,7 +38,7 @@ import se.e2t.xraycalc.Inparameters;
  */
 public class Guistart extends Application {
     public static final String PROG_VER = "2.0.0";
-    public static final String PROG_TITLE_STRING = " - xrfSource";
+    public static final String PROG_TITLE_STRING = " - xrfSource modified by cx 2025";
     private Inparameters _inParameters;
     private Stage _primaryStage;
     private XraySourceGuiMainController _primaryController;
